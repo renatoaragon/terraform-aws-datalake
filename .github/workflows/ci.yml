@@ -31,3 +31,17 @@ jobs:
         run: |
           terraform init -backend=false
           terraform validate
+
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up tflint
+        uses: terraform-linters/setup-tflint@v4
+
+      - name: Lint module
+        run: tflint --chdir modules/data_lake
+
+      - name: Lint example
+        run: tflint --chdir examples/basic

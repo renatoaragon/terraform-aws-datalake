@@ -1,6 +1,10 @@
 locals {
   bucket_name = "${var.name_prefix}-datalake-${var.environment}"
 
+  # Glue/Athena identifiers with hyphens force quoting in every SQL query;
+  # normalize to underscores so the database name is always query-friendly.
+  glue_database_name = replace("${var.name_prefix}_${var.environment}", "-", "_")
+
   tags = merge(
     {
       Environment = var.environment
@@ -68,7 +72,7 @@ resource "aws_s3_bucket_lifecycle_configuration" "lake" {
 # --- Glue data catalog ------------------------------------------------------
 
 resource "aws_glue_catalog_database" "this" {
-  name        = "${var.name_prefix}_${var.environment}"
+  name        = local.glue_database_name
   description = "Catalog database for the ${var.name_prefix} data lake (${var.environment})."
 }
 
