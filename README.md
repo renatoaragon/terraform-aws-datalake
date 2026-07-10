@@ -71,10 +71,17 @@ terraform plan
   are always on; you cannot forget to enable them.
 - **Reusable** — everything is parameterised through variables; the example just
   wires it up for one environment.
-- **Validated inputs** — `environment` is constrained to known values so typos
-  fail fast at plan time.
-- **CI-checked** — GitHub Actions runs `terraform fmt -check` and
-  `terraform validate` on the module and the example on every push.
+- **Validated inputs** — every constraint the AWS API would reject at apply time
+  is enforced at **plan time** instead: `environment` is constrained to known
+  values, `name_prefix` must satisfy S3 bucket-name rules (it becomes part of
+  the bucket name), and `raw_transition_days` respects the 30-day STANDARD_IA
+  minimum.
+- **Query-friendly identifiers** — the Glue database name normalizes hyphens to
+  underscores, so a prefix like `acme-corp` never produces a database that needs
+  quoting in every Athena query.
+- **CI-checked** — GitHub Actions runs `terraform fmt -check`,
+  `terraform validate` and **tflint** (recommended preset) on the module and the
+  example on every push.
 
 ## License
 
