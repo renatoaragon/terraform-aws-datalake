@@ -34,6 +34,17 @@ variable "raw_transition_days" {
   }
 }
 
+variable "athena_results_expiration_days" {
+  description = "Days before Athena query results are deleted. Results are a cache, not data."
+  type        = number
+  default     = 30
+
+  validation {
+    condition     = var.athena_results_expiration_days >= 1
+    error_message = "athena_results_expiration_days must be at least 1."
+  }
+}
+
 variable "force_destroy" {
   description = "Allow deleting the bucket even when it still contains objects."
   type        = bool

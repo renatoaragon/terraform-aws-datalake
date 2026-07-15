@@ -67,6 +67,22 @@ resource "aws_s3_bucket_lifecycle_configuration" "lake" {
       storage_class = "STANDARD_IA"
     }
   }
+
+  # Athena writes every query's results here and never cleans up after itself.
+  # They are a cache (any query can be re-run), so they expire instead of
+  # accumulating storage cost forever.
+  rule {
+    id     = "athena-results-expiration"
+    status = "Enabled"
+
+    filter {
+      prefix = "athena-results/"
+    }
+
+    expiration {
+      days = var.athena_results_expiration_days
+    }
+  }
 }
 
 # --- Glue data catalog ------------------------------------------------------

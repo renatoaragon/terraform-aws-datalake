@@ -53,6 +53,7 @@ terraform plan
 | `name_prefix` | string | — | Prefix for bucket and catalog names |
 | `environment` | string | — | One of `dev`, `staging`, `prod` (validated) |
 | `raw_transition_days` | number | `30` | Days before `raw/` objects move to `STANDARD_IA` |
+| `athena_results_expiration_days` | number | `30` | Days before Athena query results are deleted (they are a cache, not data) |
 | `force_destroy` | bool | `false` | Allow destroying a non-empty bucket |
 | `tags` | map(string) | `{}` | Extra tags merged onto all resources |
 
