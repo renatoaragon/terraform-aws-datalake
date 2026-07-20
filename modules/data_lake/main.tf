@@ -51,6 +51,56 @@ resource "aws_s3_bucket_public_access_block" "lake" {
   restrict_public_buckets = true
 }
 
+# S3 accepts plain HTTP unless a policy says otherwise: encryption at rest
+# (above) says nothing about the wire. This denies every request that did not
+# arrive over TLS, for any principal and any action.
+data "aws_iam_policy_document" "https_only" {
+  statement {
+    sid    = "DenyInsecureTransport"
+    effect = "Deny"
+
+    principals {
+      type        = "*"
+      identifiers = ["*"]
+    }
+
+    actions = ["s3:*"]
+
+    resources = [
+      aws_s3_bucket.lake.arn,
+      "${aws_s3_bucket.lake.arn}/*",
+    ]
+
+    condition {
+      test     = "Bool"
+      variable = "aws:SecureTransport"
+      values   = ["false"]
+    }
+  }
+}
+
+# Server access logging, off by default: it needs a destination bucket, and
+# creating one unasked would mean unrequested cost and a second bucket to
+# manage. Point it at an existing log bucket to turn it on.
+resource "aws_s3_bucket_logging" "lake" {
+  count = var.access_log_bucket == "" ? 0 : 1
+
+  bucket        = aws_s3_bucket.lake.id
+  target_bucket = var.access_log_bucket
+  target_prefix = var.access_log_prefix
+}
+
+resource "aws_s3_bucket_policy" "https_only" {
+  bucket = aws_s3_bucket.lake.id
+  policy = data.aws_iam_policy_document.https_only.json
+
+  # The public access block sets `block_public_policy`, which rejects a policy
+  # with a wildcard principal while it is being evaluated as "public". This
+  # policy is a Deny, so it is not public, but the ordering still matters:
+  # the block must exist first.
+  depends_on = [aws_s3_bucket_public_access_block.lake]
+}
+
 resource "aws_s3_bucket_lifecycle_configuration" "lake" {
   bucket = aws_s3_bucket.lake.id
 

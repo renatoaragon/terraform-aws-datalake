@@ -45,6 +45,18 @@ variable "athena_results_expiration_days" {
   }
 }
 
+variable "access_log_bucket" {
+  description = "Existing bucket to receive S3 server access logs. Empty disables logging."
+  type        = string
+  default     = ""
+}
+
+variable "access_log_prefix" {
+  description = "Key prefix for the access logs in access_log_bucket."
+  type        = string
+  default     = "s3-access-logs/"
+}
+
 variable "force_destroy" {
   description = "Allow deleting the bucket even when it still contains objects."
   type        = bool
