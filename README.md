@@ -54,6 +54,8 @@ terraform plan
 | `environment` | string | — | One of `dev`, `staging`, `prod` (validated) |
 | `raw_transition_days` | number | `30` | Days before `raw/` objects move to `STANDARD_IA` |
 | `athena_results_expiration_days` | number | `30` | Days before Athena query results are deleted (they are a cache, not data) |
+| `access_log_bucket` | string | `""` | Existing bucket for S3 server access logs; empty disables logging |
+| `access_log_prefix` | string | `"s3-access-logs/"` | Key prefix for the access logs |
 | `force_destroy` | bool | `false` | Allow destroying a non-empty bucket |
 | `tags` | map(string) | `{}` | Extra tags merged onto all resources |
 
@@ -69,7 +71,11 @@ terraform plan
 ## Design notes
 
 - **Secure by default** — encryption, versioning and a full public-access block
-  are always on; you cannot forget to enable them.
+  are always on; you cannot forget to enable them. A bucket policy also denies
+  every request that did not arrive over TLS: encryption at rest says nothing
+  about the wire, and S3 accepts plain HTTP unless a policy refuses it.
+  Server access logging is available (`access_log_bucket`) but off by default,
+  since it needs a destination bucket and would otherwise mean unrequested cost.
 - **Reusable** — everything is parameterised through variables; the example just
   wires it up for one environment.
 - **Validated inputs** — every constraint the AWS API would reject at apply time
