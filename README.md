@@ -54,6 +54,7 @@ terraform plan
 | `environment` | string | — | One of `dev`, `staging`, `prod` (validated) |
 | `raw_transition_days` | number | `30` | Days before `raw/` objects move to `STANDARD_IA` |
 | `athena_results_expiration_days` | number | `30` | Days before Athena query results are deleted (they are a cache, not data) |
+| `noncurrent_version_expiration_days` | number | `90` | Days a noncurrent object version is kept before deletion (versioning is on) |
 | `access_log_bucket` | string | `""` | Existing bucket for S3 server access logs; empty disables logging |
 | `access_log_prefix` | string | `"s3-access-logs/"` | Key prefix for the access logs |
 | `force_destroy` | bool | `false` | Allow destroying a non-empty bucket |
