@@ -45,6 +45,17 @@ variable "athena_results_expiration_days" {
   }
 }
 
+variable "noncurrent_version_expiration_days" {
+  description = "Days a noncurrent object version is kept before deletion. Versioning is on, so old versions accumulate otherwise."
+  type        = number
+  default     = 90
+
+  validation {
+    condition     = var.noncurrent_version_expiration_days >= 1
+    error_message = "noncurrent_version_expiration_days must be at least 1."
+  }
+}
+
 variable "access_log_bucket" {
   description = "Existing bucket to receive S3 server access logs. Empty disables logging."
   type        = string

@@ -133,6 +133,21 @@ resource "aws_s3_bucket_lifecycle_configuration" "lake" {
       days = var.athena_results_expiration_days
     }
   }
+
+  # Versioning is on (above), which is good for recovery but means every
+  # overwrite keeps the old version forever. Left alone, noncurrent versions
+  # are an invisible, unbounded storage bill. Expire them after a grace period
+  # that still covers accidental overwrites.
+  rule {
+    id     = "expire-noncurrent-versions"
+    status = "Enabled"
+
+    filter {}
+
+    noncurrent_version_expiration {
+      noncurrent_days = var.noncurrent_version_expiration_days
+    }
+  }
 }
 
 # --- Glue data catalog ------------------------------------------------------
