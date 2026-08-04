@@ -69,6 +69,32 @@ terraform plan
 | `glue_database_name` | Glue catalog database name |
 | `athena_workgroup` | Athena workgroup name |
 
+## Design principles
+
+Tools are the most disposable part of data engineering, and infrastructure is no
+exception. Terraform could be OpenTofu or Pulumi, and AWS could be another cloud,
+without changing what this module is for. What lasts is the posture: infrastructure
+that is secure by default, fails at plan time rather than apply time, and is reused
+rather than copied. So this module is built around those guarantees, not around one
+provider's syntax.
+
+This is the foundation the rest of the platform sits on: the S3, Glue and Athena
+layer that stores and exposes the data a lakehouse like
+[delta-lakehouse-mlflow](https://github.com/renatoaragon/delta-lakehouse-mlflow)
+writes and an analytics layer like
+[dbt-duckdb-analytics](https://github.com/renatoaragon/dbt-duckdb-analytics)
+queries. The principles it holds to:
+
+- **Secure by default, not by remembering.** Encryption, versioning, a full
+  public-access block and a TLS-only bucket policy are always on. Safety you have to
+  opt into is safety someone eventually forgets.
+- **Fail at plan, not at apply.** Every constraint the AWS API would reject at apply
+  time is validated at plan time instead, so a bad input is caught in seconds, not
+  halfway through provisioning.
+- **Reusable, not copied.** The module is parameterised and the example just wires it
+  for one environment. Infrastructure that is copy-pasted drifts; a module stays one
+  source of truth.
+
 ## Design notes
 
 - **Secure by default** — encryption, versioning and a full public-access block
